@@ -42,7 +42,7 @@ def cargarComics():
     return comics
 
 #-------------------------------------------------------------------------------------------------------
-
+columnas_simples = ["Titulo","Descripcion","FechaPublicacion","AñosActivos","Escritor","Dibujante","Precio"]
 #--------------------------Bloques css para estilos------------------------
 
 st.markdown("""
@@ -149,7 +149,7 @@ def busqueda(cadena,comic):
         
         # Mostrar el dataframe filtrado
         if not filtrado.empty:
-            st.dataframe(filtrado, use_container_width=True)
+            st.dataframe(filtrado[columnas_simples], use_container_width=True)
         else:
             st.write("No se encontraron comics con ese término.")
 
@@ -164,7 +164,7 @@ def home():
         busqueda(search, comics)
     else:
         # Mostrar todos los comics si no hay texto de búsqueda
-        st.dataframe(comics, use_container_width=True)
+        st.dataframe(comics[columnas_simples], use_container_width=True)
 
 
 def sistema_recomendacion():
@@ -218,16 +218,11 @@ def paraLeer():
 
 #******************************************************************************************
 
-try:
 
+if "comics" not in st.session_state:
+    st.session_state.comics = cargarComics()
 
-    if "comics" not in st.session_state:
-        st.session_state.comics = cargarComics()
-
-    comics = st.session_state.comics
-except:
-    st.error("Error al cargar el archivo")
-
+comics = st.session_state.comics
 
 
 if "comicsPreprocesado" not in st.session_state:
