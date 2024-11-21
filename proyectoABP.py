@@ -153,15 +153,19 @@ def sistema_recomendacion():
 
     titulo = st.text_input("", key="titulo")
 
+
     if titulo:
-        indiceComic = comicsPreprocesado[comicsPreprocesado['Titulo']==titulo].index.values[0]
+        try:
+            indiceComic = comicsPreprocesado[comicsPreprocesado['Titulo']==titulo].index.values[0]
 
-        distance_scores = list(enumerate(matrizDistancias[indiceComic]))#Se crea una lista con las distancias
-        ordered_scores = sorted(distance_scores, key=lambda x: x[1])#Se ordenan las distancias
-        top_scores = ordered_scores[1:11]#Se escojen las 10 mejores distancias
-        top_indexes = [i[0] for i in top_scores]#Se buscan los indices de las peliculas con las 10 mejores distancias
+            distance_scores = list(enumerate(matrizDistancias[indiceComic]))#Se crea una lista con las distancias
+            ordered_scores = sorted(distance_scores, key=lambda x: x[1])#Se ordenan las distancias
+            top_scores = ordered_scores[1:11]#Se escojen las 10 mejores distancias
+            top_indexes = [i[0] for i in top_scores]#Se buscan los indices de las peliculas con las 10 mejores distancias
 
-        st.dataframe(comicsPreprocesado['Titulo'].iloc[top_indexes] , use_container_width=True)
+            st.dataframe(comicsPreprocesado['Titulo'].iloc[top_indexes] , use_container_width=True)
+        except:
+            st.write("El titulo no se encuentra en la base de datos")
     else:
         st.write("No se encontro el titulo")
 
