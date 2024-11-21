@@ -3,13 +3,13 @@
 
 import streamlit as st
 import pandas as pd
+import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import pairwise_distances
 
-import nltk
 
 
 #-----------------------------------------------------Carga de datos-----------------------------------------------
