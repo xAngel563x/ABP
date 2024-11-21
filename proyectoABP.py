@@ -173,15 +173,23 @@ def favoritos():
 
 #******************************************************************************************
 
-if "comics" not in st.session_state:
-    st.session_state.comics = cargarComics()
+try:
 
-comics = st.session_state.comics
+
+    if "comics" not in st.session_state:
+        st.session_state.comics = cargarComics()
+
+    comics = st.session_state.comics
+except:
+    st.error("Error al cargar el archivo")
+
+
 
 if "comicsPreprocesado" not in st.session_state:
     st.session_state.comicsPreprocesado = crearTextoPreprocesado()
 
 comicsPreprocesado = st.session_state.comicsPreprocesado
+
 
 if "matrizDistancias" not in st.session_state:
     st.session_state.matrizDistancias = instanciarMatrizDistancias()
