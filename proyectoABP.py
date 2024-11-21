@@ -153,6 +153,16 @@ def busqueda(cadena,comic):
         else:
             st.write("No se encontraron comics con ese término.")
 
+def busquedaTit(cadena,comic):
+        
+        filtrado = comic[comic['Titulo'].str.contains(cadena, case=False)]
+        
+        # Mostrar el dataframe filtrado
+        if not filtrado.empty:
+            st.dataframe(filtrado, use_container_width=True)
+        else:
+            st.write("No se encontraron comics con ese término.")
+
 
 def home():
     st.markdown("<h1 class='titulo'>Búsqueda de comics</h1>", unsafe_allow_html=True)
@@ -175,7 +185,7 @@ def sistema_recomendacion():
 
     if search:
         fil = comicsPreprocesado[["Titulo"]]
-        busqueda(search, fil)
+        busquedaTit(search, fil)
     else:
         # Mostrar todos los comics si no hay texto de búsqueda
         st.dataframe(comicsPreprocesado[["Titulo"]], use_container_width=True)
