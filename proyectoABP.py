@@ -15,7 +15,7 @@ from sklearn.metrics import pairwise_distances
 #-----------------------------------------------------Carga de datos-----------------------------------------------
 def cargarComics():
     #Cargar datos
-    comics = pd.read_csv('./Marvel_Comics2.csv')
+    comics = pd.read_csv('./Marvel_Comics3.csv')
 
     #Cambiar nombre de las columnas
     comics.columns = ['Nombre','AñosActivos','Titulo','FechaPublicacion',
