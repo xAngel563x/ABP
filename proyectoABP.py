@@ -43,10 +43,6 @@ def cargarComics():
 
 #-------------------------------------------------------------------------------------------------------
 
-#----------------------------------Variables globales-----------------------
-columnas_simples = ['Titulo', 'Descripcion', 'Precio']
-#---------------------------------------------------------------------------
-
 #--------------------------Bloques css para estilos------------------------
 
 st.markdown("""
@@ -70,6 +66,40 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+#Estilo del footer
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        color: grey;
+        font-size: 12px;
+        padding: 10px;
+    }
+    </style>
+    <div class="footer">
+        © 2024 - Proyecto de ABP
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# CSS personalizado para la barra lateral
+st.markdown(
+    """
+    <style>
+    [data-testid="stSidebar"] {
+        background-color: #007786;
+        padding: 20px;
+        border-right: 3px solid #48cae4;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 #--------------------------------------------------------------------------
 
@@ -115,8 +145,8 @@ def instanciarMatrizDistancias():
 
 def busqueda(cadena,comic):
         
-        fil = comic[comic['Titulo'].str.contains(cadena, case=False)]
-        filtrado = fil[columnas_simples]
+        filtrado = comic[comic['Titulo'].str.contains(cadena, case=False)]
+        
         # Mostrar el dataframe filtrado
         if not filtrado.empty:
             st.dataframe(filtrado, use_container_width=True)
@@ -127,27 +157,28 @@ def busqueda(cadena,comic):
 def home():
     st.markdown("<h1 class='titulo'>Búsqueda de comics</h1>", unsafe_allow_html=True)
 
-    st.markdown("<h4 class='texto'>Buscar comics por nombre o título:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Buscar información de comics por título:</h4>", unsafe_allow_html=True)
     search = st.text_input("")
 
     if search:
         busqueda(search, comics)
     else:
         # Mostrar todos los comics si no hay texto de búsqueda
-        st.dataframe(comics[columnas_simples], use_container_width=True)
+        st.dataframe(comics, use_container_width=True)
 
 
 def sistema_recomendacion():
     st.markdown("<h1 class='titulo'>Bienvenido al sistema de recomendación:</h1>", unsafe_allow_html=True)
 
-    st.markdown("<h4 class='texto'>Buscar comics por nombre o título:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Buscar comics por título:</h4>", unsafe_allow_html=True)
     search = st.text_input("", key="search")
 
     if search:
-        busqueda(search, comicsPreprocesado)
+        fil = comicsPreprocesado[["Titulo"]]
+        busqueda(search, fil)
     else:
         # Mostrar todos los comics si no hay texto de búsqueda
-        st.dataframe(comicsPreprocesado[columnas_simples], use_container_width=True)
+        st.dataframe(comicsPreprocesado[["Titulo"]], use_container_width=True)
 
     st.markdown("<h4 class='texto'>Inserte titulo completo del comic:</h4>", unsafe_allow_html=True)
 
@@ -163,6 +194,7 @@ def sistema_recomendacion():
             top_scores = ordered_scores[1:11]#Se escojen las 10 mejores distancias
             top_indexes = [i[0] for i in top_scores]#Se buscan los indices de las peliculas con las 10 mejores distancias
 
+            st.markdown("<p class='texto'>Comics recomendados:</p>", unsafe_allow_html=True)
             st.dataframe(comicsPreprocesado['Titulo'].iloc[top_indexes] , use_container_width=True)
         except:
             st.write("El titulo no se encuentra en la base de datos")
@@ -174,6 +206,15 @@ def sistema_recomendacion():
 
 def favoritos():
     st.markdown("<h1 class='titulo'>Bienvenido a tus favoritos:</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
+
+def leidos():
+    st.markdown("<h1 class='titulo'>Bienvenido a tus comics leídos:</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
+
+def paraLeer():
+    st.markdown("<h1 class='titulo'>Bienvenido a tus comics para leer:</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 #******************************************************************************************
 
@@ -200,11 +241,11 @@ if "matrizDistancias" not in st.session_state:
 
 matrizDistancias = st.session_state.matrizDistancias
 
-
+st.sidebar.title("Opciones")
 
 menu = st.sidebar.radio(
         "",
-        ["Home","Sistema de recomendación", "Favoritos"]
+        ["Home","Sistema de recomendación", "Comics leídos", "Comics para leer","Favoritos"]
     )
 
 
@@ -214,4 +255,8 @@ elif menu == "Sistema de recomendación":
     sistema_recomendacion()
 elif menu == "Favoritos":
     favoritos()
+elif menu == "Comics leídos":
+    leidos()
+elif menu == "Comics para leer":
+    paraLeer()
 
