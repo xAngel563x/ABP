@@ -165,7 +165,7 @@ def busquedaTit(cadena,comic):
 
 
 def home():
-    st.markdown("<h1 class='titulo'>Búsqueda de comics</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='titulo'>BuscaComics</h1>", unsafe_allow_html=True)
 
     st.markdown("<h4 class='texto'>Buscar información de comics por título:</h4>", unsafe_allow_html=True)
     search = st.text_input("")
