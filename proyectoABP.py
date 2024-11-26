@@ -250,7 +250,7 @@ st.sidebar.title("Opciones")
 
 menu = st.sidebar.radio(
         "",
-        ["Home","Sistema de recomendación", "Comics leídos", "Comics para leer","Favoritos"]
+        ["Home","Sistema de recomendación", "Comics para leer", "Tus reviews","Favoritos"]
     )
 
 
@@ -260,7 +260,7 @@ elif menu == "Sistema de recomendación":
     sistema_recomendacion()
 elif menu == "Favoritos":
     favoritos()
-elif menu == "Comics leídos":
+elif menu == "Tus reviews":
     leidos()
 elif menu == "Comics para leer":
     paraLeer()
