@@ -218,12 +218,16 @@ def favoritos():
     st.markdown("<h1 class='titulo'>Bienvenido a tus favoritos:</h1>", unsafe_allow_html=True)
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
-def leidos():
+def tusReviews():
     st.markdown("<h1 class='titulo'>Bienvenido a tus reviews:</h1>", unsafe_allow_html=True)
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 def paraLeer():
     st.markdown("<h1 class='titulo'>Bienvenido a tus comics para leer:</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
+
+def reviews():
+    st.markdown("<h1 class='titulo'>Bienvenido a las reviews públicas:</h1>", unsafe_allow_html=True)
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 #******************************************************************************************
@@ -250,7 +254,7 @@ st.sidebar.title("Opciones")
 
 menu = st.sidebar.radio(
         "",
-        ["Home","Sistema de recomendación", "Comics para leer", "Tus reviews","Favoritos"]
+        ["Home","Sistema de recomendación", "Comics para leer", "Favoritos", "Tus reviews", "Reviews públicas"]
     )
 
 
@@ -261,7 +265,9 @@ elif menu == "Sistema de recomendación":
 elif menu == "Favoritos":
     favoritos()
 elif menu == "Tus reviews":
-    leidos()
+    tusReviews()
 elif menu == "Comics para leer":
     paraLeer()
+elif menu == "Reviews públicas":
+    reviews()
 
