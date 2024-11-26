@@ -219,7 +219,7 @@ def favoritos():
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 def leidos():
-    st.markdown("<h1 class='titulo'>Bienvenido a tus comics leídos:</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='titulo'>Bienvenido a tus reviews:</h1>", unsafe_allow_html=True)
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 def paraLeer():
