@@ -194,7 +194,7 @@ def sistema_recomendacion():
 
 
     with col2:
-        st.markdown("<h4 class='texto'>Titulo completo del comic:</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 class='texto'>Tyitulo completo del comic:</h4>", unsafe_allow_html=True)
         titulo = st.text_input("", key="titulo")
         if titulo:
             try:
