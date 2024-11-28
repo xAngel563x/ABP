@@ -180,36 +180,37 @@ def home():
 def sistema_recomendacion():
     st.markdown("<h1 class='titulo'>Bienvenido al sistema de recomendación:</h1>", unsafe_allow_html=True)
 
-    st.markdown("<h4 class='texto'>Buscar comics por título:</h4>", unsafe_allow_html=True)
-    search = st.text_input("", key="search")
-
-    if search:
-        fil = comicsPreprocesado[["Titulo"]]
-        busquedaTit(search, fil)
-    else:
-        # Mostrar todos los comics si no hay texto de búsqueda
-        st.dataframe(comicsPreprocesado[["Titulo"]], use_container_width=True)
-
-    st.markdown("<h4 class='texto'>Inserte titulo completo del comic:</h4>", unsafe_allow_html=True)
-
-    titulo = st.text_input("", key="titulo")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("<h4 class='texto'>Buscar comics por título:</h4>", unsafe_allow_html=True)
+        search = st.text_input("", key="search")
+        if search:
+            fil = comicsPreprocesado[["Titulo"]]
+            busquedaTit(search, fil)
+        else:
+            # Mostrar todos los comics si no hay texto de búsqueda
+            st.dataframe(comicsPreprocesado[["Titulo"]], use_container_width=True)
 
 
-    if titulo:
-        try:
-            indiceComic = comicsPreprocesado[comicsPreprocesado['Titulo']==titulo].index.values[0]
 
-            distance_scores = list(enumerate(matrizDistancias[indiceComic]))#Se crea una lista con las distancias
-            ordered_scores = sorted(distance_scores, key=lambda x: x[1])#Se ordenan las distancias
-            top_scores = ordered_scores[1:11]#Se escojen las 10 mejores distancias
-            top_indexes = [i[0] for i in top_scores]#Se buscan los indices de las peliculas con las 10 mejores distancias
+    with col2:
+        st.markdown("<h4 class='texto'>Titulo completo del comic:</h4>", unsafe_allow_html=True)
+        titulo = st.text_input("", key="titulo")
+        if titulo:
+            try:
+                indiceComic = comicsPreprocesado[comicsPreprocesado['Titulo']==titulo].index.values[0]
 
-            st.markdown("<p class='texto'>Comics recomendados:</p>", unsafe_allow_html=True)
-            st.dataframe(comicsPreprocesado['Titulo'].iloc[top_indexes] , use_container_width=True)
-        except:
-            st.write("El titulo no se encuentra en la base de datos")
-    else:
-        st.write("No se encontro el titulo")
+                distance_scores = list(enumerate(matrizDistancias[indiceComic]))#Se crea una lista con las distancias
+                ordered_scores = sorted(distance_scores, key=lambda x: x[1])#Se ordenan las distancias
+                top_scores = ordered_scores[1:11]#Se escojen las 10 mejores distancias
+                top_indexes = [i[0] for i in top_scores]#Se buscan los indices de las peliculas con las 10 mejores distancias
+
+                st.markdown("<p class='texto'>Comics recomendados:</p>", unsafe_allow_html=True)
+                st.dataframe(comicsPreprocesado['Titulo'].iloc[top_indexes] , use_container_width=True)
+            except:
+                st.write("El titulo no se encuentra en la base de datos")
+        else:
+            st.write("No se encontro el titulo")
 
 
 
