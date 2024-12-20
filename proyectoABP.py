@@ -4,23 +4,25 @@
 import streamlit as st
 import pandas as pd
 import nltk
+import os
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import pairwise_distances
+from sklearn import svm
 
 
 
-#-----------------------------------------------------Carga de datos-----------------------------------------------
+#------------------------------------------------Carga de datos-----------------------------------------------
 def cargarComics():
     #Cargar datos
-    comics = pd.read_csv('./Marvel_Comics3.csv')
+    comics = pd.read_csv('./marvel-test3.csv')
 
     #Cambiar nombre de las columnas
-    comics.columns = ['Nombre','AñosActivos','Titulo','FechaPublicacion',
+    comics.columns = ['Indice','Nombre','AñosActivos','Titulo','FechaPublicacion',
                   'Descripcion','Dibujante','Escritor','DibujantePortada','Imprenta',
-                  'Formato','Categoría','Precio']
+                  'Formato','Categoría','Precio','label','text']
 
     #Quitar duplicados
     comics.drop_duplicates(inplace=True)
@@ -115,24 +117,93 @@ def crearTextoPreprocesado():
 
     for row in comics.itertuples():
 
-
-        text = word_tokenize(row[5]) ## indice de la columna que contiene el texto
+        
+        text = word_tokenize(row[6]) ## indice de la columna que contiene el texto
         ## Remove stop words
         stops = set(stopwords.words("english"))
         text = [ps.stem(w) for w in text if not w in stops and w.isalnum()]
         text = " ".join(text)
 
         preprocessedText.append(text)
+        
 
     comicsPreprocesado = comics
-    comicsPreprocesado['TextoPreprocesado'] = preprocessedText
+    comicsPreprocesado['SinopsisPreprocesado'] = preprocessedText
 
     return comicsPreprocesado
 
+def cargarBolsaSentimientos():
+    trainingData = pd.read_csv('./marvel-train.csv')
+    ps = PorterStemmer()
+
+    textoProcesado = []
+
+    for row in trainingData.itertuples():
+
+
+        text = word_tokenize(row.body) ## indice de la columna que contiene el texto
+        ## Remove stop words
+        stops = set(stopwords.words("english"))
+        text = [ps.stem(w) for w in text if not w in stops and w.isalnum()]
+        text = " ".join(text)
+
+        textoProcesado.append(text)
+
+    datosProcesados = trainingData
+    datosProcesados['ReviewPreprocesada'] = textoProcesado
+
+    #Se carga la bolsa de palabras para las reviews
+    bolsaSentimientos = TfidfVectorizer()
+    bolsaSentimientos.fit(datosProcesados['ReviewPreprocesada'])    
+    return bolsaSentimientos
+
+def cargarModelo():
+    trainingData = pd.read_csv('./marvel-train.csv')
+
+    #Se preprocesan las reviews
+    nltk.download('punkt_tab')
+    nltk.download('punkt')
+    nltk.download('stopwords')
+
+
+    print(os.path.exists(nltk.data.find('tokenizers/punkt')))
+
+    ps = PorterStemmer()
+
+    textoProcesado = []
+
+    for row in trainingData.itertuples():
+
+
+        text = word_tokenize(row.body) ## indice de la columna que contiene el texto
+        ## Remove stop words
+        stops = set(stopwords.words("english"))
+        text = [ps.stem(w) for w in text if not w in stops and w.isalnum()]
+        text = " ".join(text)
+
+        textoProcesado.append(text)
+
+    datosProcesados = trainingData
+    datosProcesados['ReviewPreprocesada'] = textoProcesado
+
+    #Se carga la bolsa de palabras para las reviews
+    bolsaSentimientos = TfidfVectorizer()
+    bolsaSentimientos.fit(datosProcesados['ReviewPreprocesada'])    
+    textsBoW= bolsaSentimientos.transform(datosProcesados['ReviewPreprocesada'])
+
+    #Se entrena el algoritmo
+    svc = svm.SVC(kernel='linear') #Modelo de clasificación
+
+    X_train = textsBoW #Documentos
+    Y_train = trainingData['label'] #Etiquetas de los documentos
+    svc.fit(X_train, Y_train) #Entrenamiento
+
+    return svc
+
 def vectorizarTexto(comicsPreprocesed):
     bolsaPalabras = TfidfVectorizer()
-    bolsaPalabras.fit(comicsPreprocesed['TextoPreprocesado'])
-    textosBoW= bolsaPalabras.transform(comicsPreprocesed['TextoPreprocesado'])
+    bolsaPalabras.fit(comicsPreprocesed['SinopsisPreprocesado'])
+    textosBoW= bolsaPalabras.transform(comicsPreprocesed['SinopsisPreprocesado'])
     return textosBoW
 
 def crearMatrizDistancias(bolsa):
@@ -162,6 +233,14 @@ def busquedaTit(cadena,comic):
             st.dataframe(filtrado, use_container_width=True)
         else:
             st.write("No se encontraron comics con ese término.")
+def busquedaReview(cadena,comic):
+    filtrado = comic[comic['Titulo'].str.contains(cadena, case=False)]
+        
+    # Mostrar el dataframe filtrado
+    if not filtrado.empty:
+        st.dataframe(filtrado[["Titulo","text","label"]], use_container_width=True)
+    else:
+        st.write("No se encontraron comics con ese término.")
 
 
 def home():
@@ -221,15 +300,104 @@ def favoritos():
 
 def tusReviews():
     st.markdown("<h1 class='titulo'>Bienvenido a tus reviews:</h1>", unsafe_allow_html=True)
-    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
+    seleccionado = ""
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("<h4 class='texto'>Buscar comics por título:</h4>", unsafe_allow_html=True)
+        search = st.text_input("", key="search")
+        if search:
+            fil = comicsPreprocesado[["Titulo","text"]]
+            busquedaTit(search, fil)
+        else:
+            # Mostrar todos los comics si no hay texto de búsqueda
+            st.dataframe(comicsPreprocesado[["Titulo","text"]], use_container_width=True)
+
+
+
+    with col2:
+        st.markdown("<h4 class='texto'>Titulo completo del comic al que deseas ponerle una review:</h4>", unsafe_allow_html=True)
+        titulo = st.text_input("", key="titulo")
+        if titulo:
+            try:
+
+                st.dataframe(comicsPreprocesado[comicsPreprocesado['Titulo'] == titulo][["Titulo","text","label"]] , use_container_width=True)
+            except:
+                st.write("El titulo no se encuentra en la base de datos")
+        else:
+            st.write("No se encontro el titulo")
+
+    if titulo != "":
+        st.markdown("<h4 class='texto'>Comentario a escribir:</h4>", unsafe_allow_html=True)
+        coment = st.text_input("", key="coment")
+        if coment:
+            botonSubir = st.button("Subir")
+            if botonSubir and coment != "":
+
+                ps = PorterStemmer()
+
+                text = word_tokenize(coment)
+                stops = set(stopwords.words("english"))
+                text = [ps.stem(w) for w in text if not w in stops and w.isalnum()]
+                text = " ".join(text)
+
+                comicsPreprocesado.loc[comicsPreprocesado['Titulo'] == titulo, 'text'] = coment
+
+                nuevaReviewVectorizada = bolsaSentimientos.transform([text])
+                prediccion = modelo.predict(nuevaReviewVectorizada)
+
+                comicsPreprocesado.loc[comicsPreprocesado['Titulo'] == titulo, 'label'] = prediccion
+
+                if prediccion == 1:
+                    st.write("Tu review ha sido catalogada como positiva")
+                if prediccion == 0:
+                    st.write("Tu review ha sido catalogada como neutral")
+                if prediccion == -1:
+                    st.write("Tu review ha sido catalogada como negativa")
+
+
+        else:
+            st.write("No se ha seleccionado ningun titulo")
+
+
 
 def paraLeer():
     st.markdown("<h1 class='titulo'>Bienvenido a tus comics para leer:</h1>", unsafe_allow_html=True)
     st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
 
 def reviews():
-    st.markdown("<h1 class='titulo'>Bienvenido a las reviews públicas:</h1>", unsafe_allow_html=True)
-    st.markdown("<h4 class='texto'>Proximamente...</h4>", unsafe_allow_html=True)
+    st.markdown("<h1 class='titulo'>Bienvenido a las reviews públicas</h1>", unsafe_allow_html=True)
+
+    st.markdown("<h4 class='texto'>Buscar reviews de comics por título:</h4>", unsafe_allow_html=True)
+    search = st.text_input("",key="search")
+
+    if search:
+        busquedaReview(search,comics)
+    else:
+        # Mostrar todos los comics si no hay texto de búsqueda
+        st.dataframe(comics[["Titulo","text","label"]], use_container_width=True)
+    
+    titulo = st.text_input("",key="titulo")
+
+    if titulo:
+        st.dataframe(comicsPreprocesado[comicsPreprocesado['Titulo'] == titulo][["Titulo","text","label"]] , use_container_width=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            botonLike = st.button("Like", key="botonLike")
+        with col2:
+            botonNeutro = st.button("Normal", key="botonNeutro")
+        with col3:
+            botonDislike = st.button("Dislike", key="botonDislike")
+        if botonLike:
+            comicsPreprocesado.loc[comicsPreprocesado['Titulo'] == titulo, 'label'] = 1
+        if botonNeutro:
+            comicsPreprocesado.loc[comicsPreprocesado['Titulo'] == titulo, 'label'] = 0
+        if botonDislike:
+            comicsPreprocesado.loc[comicsPreprocesado['Titulo'] == titulo, 'label'] = -1
+    else:
+        st.write("El titulo no esta en la base de datos")
+
+
 
 #******************************************************************************************
 
@@ -250,6 +418,17 @@ if "matrizDistancias" not in st.session_state:
     st.session_state.matrizDistancias = instanciarMatrizDistancias()
 
 matrizDistancias = st.session_state.matrizDistancias
+
+
+if "modelo" not in st.session_state:
+    st.session_state.modelo = cargarModelo()
+
+modelo = st.session_state.modelo
+
+if "bolsaSentimientos" not in st.session_state:
+    st.session_state.bolsaSentimientos = cargarBolsaSentimientos()
+
+bolsaSentimientos = st.session_state.bolsaSentimientos
 
 st.sidebar.title("Opciones")
 
